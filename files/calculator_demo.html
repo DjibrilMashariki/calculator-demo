@@ -114,18 +114,23 @@
   }
 
   .menu-btn{
+    flex:1 1 180px;
     appearance:none;
     border:1px solid #2b4159;
     background:linear-gradient(180deg, #172637, #101a28);
     color:var(--text);
     border-radius:16px;
-    padding:12px 14px;
+    padding:18px 18px;
+    min-height:112px;
     cursor:pointer;
     font:inherit;
     display:flex;
+    flex-direction:column;
     align-items:center;
-    gap:10px;
+    justify-content:center;
+    gap:6px;
     transition:transform .14s ease, border-color .14s ease, background .14s ease;
+    position:relative;
   }
   .menu-btn:hover{
     transform:translateY(-1px);
@@ -136,14 +141,28 @@
     border-color:rgba(31,78,143,.7);
     box-shadow:0 0 0 1px rgba(31,78,143,.15) inset;
   }
-  .menu-btn .label{font-weight:600;}
-  .menu-btn .hint{font-size:12px; color:var(--muted);}
-  .menu-btn .key{
-    min-width:30px; height:30px; display:grid; place-items:center;
-    border-radius:10px;
-    background:linear-gradient(180deg, rgba(31,78,143,.55), rgba(31,165,74,.42));
-    color:var(--white);
+  .menu-btn .label{
     font-weight:700;
+    font-size:20px;
+    letter-spacing:-.02em;
+    text-align:center;
+  }
+  .menu-btn .hint{
+    font-size:13px;
+    color:var(--muted);
+    text-align:center;
+    max-width:140px;
+    line-height:1.35;
+  }
+  .menu-btn .chev{
+    color:var(--green);
+    font-size:20px;
+    line-height:1;
+    opacity:.9;
+    position:absolute;
+    right:16px;
+    top:50%;
+    transform:translateY(-50%);
   }
 
   .panel{
@@ -307,6 +326,118 @@
   .exit-card{
     padding:18px;
   }
+
+  .settings-grid{
+    display:grid;
+    grid-template-columns:minmax(0, 1.2fr) minmax(280px, .8fr);
+    gap:16px;
+  }
+
+  .mini-grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+
+  .mini-btn{
+    appearance:none;
+    border:1px solid rgba(58,78,100,.95);
+    background:linear-gradient(180deg, rgba(23,37,58,.98), rgba(16,27,41,.98));
+    color:var(--text);
+    border-radius:16px;
+    min-height:62px;
+    padding:12px 14px;
+    font:inherit;
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:-.03em;
+    transition:transform .14s ease, border-color .14s ease, background .14s ease;
+  }
+  .mini-btn:hover{
+    border-color:#50718f;
+    background:linear-gradient(180deg, rgba(31,78,143,.16), rgba(16,27,41,.98));
+    transform:translateY(-1px);
+  }
+  .mini-btn .mini-value{color:var(--green);}
+
+  .settings-card{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-height:320px;
+    text-align:center;
+    padding:24px;
+  }
+
+  .settings-card p{
+    margin:0 auto 18px;
+    max-width:28ch;
+    font-size:18px;
+    line-height:1.5;
+    color:var(--white);
+  }
+
+  .settings-card .draft{
+    margin-top:0;
+    font-size:28px;
+    min-height:76px;
+    display:grid;
+    place-items:center;
+  }
+
+  .settings-card .shortcuts{
+    justify-content:center;
+    margin-top:16px;
+  }
+
+  .sidebar-card{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-height:320px;
+    text-align:center;
+    padding:24px;
+  }
+
+  .sidebar-card h3{
+    margin:0 0 10px;
+    font-size:15px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-align:center;
+  }
+
+  .sidebar-card .history-list,
+  .sidebar-card .mini-grid{
+    margin-top:14px;
+  }
+
+  .exit-card{
+    min-height:280px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:28px;
+  }
+
+  .exit-card p{
+    margin:0;
+    font-size:20px;
+    line-height:1.5;
+    max-width:22ch;
+    color:var(--white);
+  }
+
+  .exit-card .shortcuts{
+    justify-content:center;
+  }
   .section-title{
     display:flex;
     align-items:center;
@@ -411,6 +542,14 @@
     .app{min-height:calc(100vh - 24px);}
     .topbar{align-items:flex-start; flex-direction:column;}
     .status{justify-content:flex-start;}
+    .menu-btn{flex-basis:100%;}
+    .settings-grid{grid-template-columns:1fr;}
+    .mini-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
+    .settings-card,
+    .sidebar-card,
+    .exit-card{min-height:unset; text-align:left;}
+    .settings-card .shortcuts,
+    .exit-card .shortcuts{justify-content:flex-start;}
     .home-view, .settings-view, .exit-view{padding:16px;}
     .key{min-height:58px; border-radius:16px; font-size:17px;}
   }
@@ -458,9 +597,9 @@
   };
 
   const navItems = [
-    { key: '1', label: 'Calculator', hint: 'Open calculator', view: 'home' },
-    { key: '2', label: 'Settings', hint: 'Set decimals', view: 'settings' },
-    { key: '3', label: 'Exit', hint: 'Show exit screen', view: 'exit' }
+    { label: 'Calculator', hint: 'Open calculator', view: 'home' },
+    { label: 'Settings', hint: 'Set decimals', view: 'settings' },
+    { label: 'Exit', hint: 'Show exit screen', view: 'exit' }
   ];
 
   function escapeHtml(value){
@@ -495,7 +634,7 @@
           <div class="label">${item.label}</div>
           <div class="hint">${item.hint}</div>
         </span>
-        <span class="key">${item.key}</span>
+        <span class="chev">›</span>
       </button>
     `).join('');
   }
@@ -616,21 +755,34 @@
   function renderSettings(){
     return `
       <section class="view settings-view active">
-        <div style="max-width:860px;">
+        <div style="max-width:980px;">
           <div class="section-title">
             <h2>Settings</h2>
             <div class="meta">Decimals</div>
           </div>
 
-          <div class="settings-card">
-            <p>Type a number from 0 to 9, then press Enter.</p>
-            <div class="draft" aria-label="Decimal draft">${escapeHtml(state.draft || '') || '0 to 9'}</div>
-            <div class="shortcuts">
-              <span class="shortcut"><strong>Enter</strong> Apply</span>
-              <span class="shortcut"><strong>Esc</strong> Home</span>
-              <span class="shortcut"><strong>Backspace</strong> Delete</span>
+          <div class="settings-grid">
+            <div class="settings-card">
+              <p>Set how many decimal places the calculator shows.</p>
+              <div class="draft" aria-label="Decimal draft">${escapeHtml(state.draft || '') || '0 to 9'}</div>
+              <div class="shortcuts">
+                <span class="shortcut"><strong>Enter</strong> Apply</span>
+                <span class="shortcut"><strong>Esc</strong> Home</span>
+                <span class="shortcut"><strong>Backspace</strong> Delete</span>
+              </div>
+              ${state.message ? `<div class="toast ${state.messageType}">${escapeHtml(state.message)}</div>` : ''}
             </div>
-            ${state.message ? `<div class="toast ${state.messageType}">${escapeHtml(state.message)}</div>` : ''}
+
+            <div class="sidebar-card">
+              <h3>Quick picks</h3>
+              <div class="mini-grid">
+                ${[0,2,3,4,6,9].map(v => `
+                  <button type="button" class="mini-btn" data-preset="${v}">
+                    <span class="mini-value">${v}</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -784,12 +936,13 @@
   }
 
   panel.addEventListener('click', (event) => {
-    const target = event.target.closest('[data-view], [data-action], [data-token]');
+    const target = event.target.closest('[data-view], [data-action], [data-token], [data-preset]');
     if (!target) return;
 
     const view = target.dataset.view;
     const action = target.dataset.action;
     const token = target.dataset.token;
+    const preset = target.dataset.preset;
 
     if (view){
       setView(view);
@@ -800,6 +953,10 @@
     if (action === 'backspace'){ backspace(); return; }
     if (action === 'evaluate'){ evaluateExpression(); return; }
     if (token) appendToken(token);
+    if (preset !== undefined){
+      state.draft = String(preset);
+      render();
+    }
   });
 
   navActions.addEventListener('click', (event) => {

@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator Demo</title>
+<style>
+  :root{
+    --bg0:#081018;
+    --bg1:#0d1622;
+    --panel:#101b28cc;
+    --panel-strong:#101b28;
+    --panel-soft:#162334;
+    --border:#233447;
+    --text:#e6eef8;
+    --muted:#8ea0b7;
+    --accent:#7dd3fc;
+    --accent-2:#34d399;
+    --warn:#fbbf24;
+    --danger:#fb7185;
+    --shadow: 0 24px 80px rgba(0,0,0,.45);
+    --radius: 24px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%; margin:0;}
+  body{
+    background:
+      radial-gradient(circle at top left, rgba(125, 211, 252, .12), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(52, 211, 153, .10), transparent 32%),
+      linear-gradient(180deg, var(--bg1), var(--bg0));
+    color:var(--text);
+    font-family:"Segoe UI Variable","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    padding:24px;
+  }
+
+  .app{
+    width:min(1180px, 100%);
+    min-height:calc(100vh - 48px);
+    margin:0 auto;
+    display:grid;
+    grid-template-rows:auto 1fr auto;
+    gap:18px;
+    outline:none;
+  }
+
+  .topbar{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    padding:4px 2px 0;
+  }
+
+  .brand{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  h1{
+    margin:0;
+    font-size:clamp(28px, 4vw, 48px);
+    line-height:1;
+    letter-spacing:-.04em;
+  }
+
+  .subhead{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+    max-width:720px;
+    line-height:1.55;
+  }
+
+  .status{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:10px;
+  }
+
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    border-radius:999px;
+    background:rgba(16, 27, 40, .7);
+    border:1px solid rgba(35, 52, 71, .95);
+    color:var(--text);
+    font-size:13px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+    backdrop-filter: blur(16px);
+  }
+
+  .pill strong{color:var(--accent);}
+
+  .shell{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:18px;
+    min-height:0;
+  }
+
+  .sidebar,
+  .panel{
+    background:var(--panel);
+    border:1px solid rgba(35, 52, 71, .92);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    backdrop-filter: blur(18px);
+  }
+
+  .sidebar{
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .nav-card{
+    padding:16px;
+    border-radius:18px;
+    background:linear-gradient(180deg, rgba(22, 35, 52, .82), rgba(16, 27, 40, .88));
+    border:1px solid rgba(35, 52, 71, .95);
+  }
+
+  .nav-card h2{
+    margin:0 0 8px;
+    font-size:15px;
+    letter-spacing:.02em;
+  }
+
+  .nav-card p{
+    margin:0;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .nav-actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .menu-btn{
+    appearance:none;
+    border:1px solid #2c4158;
+    background:linear-gradient(180deg, #172535, #111c29);
+    color:var(--text);
+    border-radius:16px;
+    padding:14px 16px;
+    text-align:left;
+    cursor:pointer;
+    transition:transform .16s ease, border-color .16s ease, background .16s ease;
+    font:inherit;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .menu-btn:hover{
+    transform:translateY(-1px);
+    border-color:#46617f;
+    background:linear-gradient(180deg, #1b2d41, #132030);
+  }
+
+  .menu-btn.active{
+    border-color:rgba(125, 211, 252, .7);
+    box-shadow:0 0 0 1px rgba(125, 211, 252, .10) inset;
+  }
+
+  .menu-btn .left{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+
+  .menu-btn .label{
+    font-size:15px;
+    font-weight:600;
+  }
+
+  .menu-btn .hint{
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  .menu-btn .key{
+    min-width:30px;
+    height:30px;
+    display:grid;
+    place-items:center;
+    border-radius:10px;
+    background:rgba(125, 211, 252, .10);
+    color:var(--accent);
+    font-weight:700;
+  }
+
+  .panel{
+    min-height:0;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .view{
+    display:none;
+    height:100%;
+    min-height:0;
+  }
+
+  .view.active{display:flex;}
+
+  .home-view,
+  .settings-view,
+  .exit-view,
+  .calculator-view{
+    flex:1;
+    min-height:0;
+    padding:22px;
+  }
+
+  .hero{
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:18px;
+    align-items:stretch;
+    margin-bottom:18px;
+  }
+
+  .card{
+    border-radius:20px;
+    background:linear-gradient(180deg, rgba(22, 35, 52, .92), rgba(14, 24, 36, .96));
+    border:1px solid rgba(35, 52, 71, .92);
+    padding:18px;
+  }
+
+  .card h3{
+    margin:0 0 8px;
+    font-size:20px;
+    letter-spacing:-.02em;
+  }
+
+  .card p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  .shortcut-row{
+    margin-top:14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+
+  .shortcut{
+    padding:8px 10px;
+    border-radius:999px;
+    border:1px solid rgba(58, 78, 100, .95);
+    color:var(--text);
+    background:rgba(125, 211, 252, .06);
+    font-size:12px;
+  }
+
+  .shortcut strong{
+    color:var(--accent);
+  }
+
+  .quick-grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:14px;
+    margin-top:18px;
+  }
+
+  .quick-card{
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    min-height:160px;
+    padding:18px;
+    border-radius:20px;
+    border:1px solid rgba(35, 52, 71, .92);
+    background:
+      linear-gradient(180deg, rgba(22, 35, 52, .96), rgba(14, 24, 36, .98));
+    cursor:pointer;
+    transition:transform .16s ease, border-color .16s ease;
+    color:inherit;
+    text-align:left;
+    font:inherit;
+  }
+
+  .quick-card:hover{
+    transform:translateY(-2px);
+    border-color:rgba(125, 211, 252, .65);
+  }
+
+  .quick-card .top{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-start;
+  }
+
+  .quick-card h4{
+    margin:0;
+    font-size:18px;
+  }
+
+  .quick-card .num{
+    width:34px;
+    height:34px;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    font-size:14px;
+    font-weight:700;
+    color:var(--accent);
+    background:rgba(125, 211, 252, .10);
+  }
+
+  .quick-card .copy{
+    margin-top:auto;
+    color:var(--muted);
+    line-height:1.5;
+    font-size:13px;
+  }
+
+  .section-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin:0 0 16px;
+  }
+
+  .section-title h2{
+    margin:0;
+    font-size:20px;
+    letter-spacing:-.02em;
+  }
+
+  .section-title .meta{
+    color:var(--muted);
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+
+  .calc-layout{
+    display:grid;
+    grid-template-columns:1fr 320px;
+    gap:18px;
+    min-height:0;
+    height:100%;
+  }
+
+  .display{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    gap:14px;
+  }
+
+  .screen{
+    border-radius:22px;
+    background:
+      linear-gradient(180deg, rgba(7, 12, 19, .7), rgba(20, 32, 47, .95));
+    border:1px solid rgba(35, 52, 71, .92);
+    padding:18px;
+    min-height:180px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    gap:16px;
+  }
+
+  .screen-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .screen-top strong{
+    color:var(--text);
+    font-weight:600;
+  }
+
+  .expr{
+    min-height:42px;
+    font-size:clamp(20px, 3vw, 30px);
+    line-height:1.25;
+    letter-spacing:-.03em;
+    word-break:break-all;
+  }
+
+  .result{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .result .label{
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .result .value{
+    font-size:clamp(34px, 5vw, 54px);
+    line-height:1;
+    letter-spacing:-.05em;
+    color:var(--accent-2);
+    font-weight:700;
+    word-break:break-all;
+  }
+
+  .history{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:18px;
+    border-radius:22px;
+    background:linear-gradient(180deg, rgba(22, 35, 52, .85), rgba(14, 24, 36, .96));
+    border:1px solid rgba(35, 52, 71, .92);
+    min-height:0;
+    max-height:100%;
+  }
+
+  .history h3{
+    margin:0;
+    font-size:14px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  .history-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    overflow:auto;
+    min-height:0;
+  }
+
+  .history-item{
+    padding:12px;
+    border-radius:16px;
+    background:rgba(16, 27, 40, .8);
+    border:1px solid rgba(35, 52, 71, .8);
+  }
+
+  .history-item .expr-line{
+    color:var(--text);
+    font-size:13px;
+    word-break:break-all;
+    line-height:1.45;
+  }
+
+  .history-item .res-line{
+    margin-top:4px;
+    color:var(--accent);
+    font-size:12px;
+  }
+
+  .keypad{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:10px;
+  }
+
+  .key{
+    appearance:none;
+    border:1px solid #2b3f55;
+    background:linear-gradient(180deg, #182637, #112030);
+    color:var(--text);
+    border-radius:18px;
+    min-height:64px;
+    padding:14px;
+    font:inherit;
+    font-size:18px;
+    cursor:pointer;
+    transition:transform .14s ease, border-color .14s ease, background .14s ease;
+  }
+
+  .key:hover{
+    transform:translateY(-1px);
+    border-color:#446381;
+    background:linear-gradient(180deg, #1d3044, #142231);
+  }
+
+  .key.operator{
+    color:var(--accent);
+    border-color:rgba(125, 211, 252, .26);
+  }
+
+  .key.emphasis{
+    color:#06131d;
+    background:linear-gradient(180deg, #9ae6ff, #56d0ff);
+    border-color:transparent;
+    font-weight:700;
+  }
+
+  .key.warning{
+    color:#1d1404;
+    background:linear-gradient(180deg, #fbbf24, #f59e0b);
+    border-color:transparent;
+    font-weight:700;
+  }
+
+  .key.danger{
+    color:#2b0710;
+    background:linear-gradient(180deg, #fda4af, #fb7185);
+    border-color:transparent;
+    font-weight:700;
+  }
+
+  .key.wide{grid-column:span 2;}
+
+  .supporting{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .support-card{
+    padding:18px;
+    border-radius:20px;
+    background:linear-gradient(180deg, rgba(22, 35, 52, .92), rgba(14, 24, 36, .98));
+    border:1px solid rgba(35, 52, 71, .92);
+  }
+
+  .support-card h3{
+    margin:0 0 10px;
+    font-size:15px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+  }
+
+  .support-card p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.55;
+    font-size:13px;
+  }
+
+  .setting-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 16px;
+    border-radius:16px;
+    background:rgba(16, 27, 40, .82);
+    border:1px solid rgba(35, 52, 71, .92);
+    margin-top:14px;
+  }
+
+  .setting-row .label{
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .setting-row .value{
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:-.03em;
+    color:var(--accent-2);
+  }
+
+  .draft{
+    margin-top:16px;
+    font-size:20px;
+    padding:16px;
+    border-radius:18px;
+    background:rgba(10, 18, 28, .75);
+    border:1px dashed rgba(125, 211, 252, .3);
+    min-height:60px;
+    word-break:break-all;
+  }
+
+  .footer{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+    color:var(--muted);
+    font-size:12px;
+    padding:0 4px;
+  }
+
+  .footer .note{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .dot{
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:var(--accent-2);
+    box-shadow:0 0 0 0 rgba(52, 211, 153, .55);
+    animation:pulse 2s infinite;
+  }
+
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(52, 211, 153, .45);}
+    70%{box-shadow:0 0 0 10px rgba(52, 211, 153, 0);}
+    100%{box-shadow:0 0 0 0 rgba(52, 211, 153, 0);}
+  }
+
+  .toast{
+    margin-top:12px;
+    padding:12px 14px;
+    border-radius:16px;
+    border:1px solid rgba(251, 191, 36, .25);
+    background:rgba(251, 191, 36, .08);
+    color:#fde68a;
+    font-size:13px;
+    line-height:1.45;
+  }
+
+  .toast.error{
+    border-color:rgba(251, 113, 133, .28);
+    background:rgba(251, 113, 133, .10);
+    color:#fecdd3;
+  }
+
+  .toast.success{
+    border-color:rgba(52, 211, 153, .28);
+    background:rgba(52, 211, 153, .10);
+    color:#bbf7d0;
+  }
+
+  @media (max-width: 1020px){
+    .shell{grid-template-columns:1fr;}
+    .sidebar{order:2;}
+  }
+
+  @media (max-width: 760px){
+    body{padding:12px;}
+    .app{min-height:calc(100vh - 24px);}
+    .topbar{align-items:flex-start; flex-direction:column;}
+    .status{justify-content:flex-start;}
+    .hero,
+    .calc-layout{grid-template-columns:1fr;}
+    .quick-grid{grid-template-columns:1fr;}
+    .home-view,
+    .settings-view,
+    .exit-view,
+    .calculator-view{padding:16px;}
+    .key{min-height:58px; border-radius:16px; font-size:17px;}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app" tabindex="0" aria-label="Calculator application">
+  <header class="topbar">
+    <div class="brand">
+      <div class="eyebrow">Desktop calculator</div>
+      <h1>Calculator Demo</h1>
+      <p class="subhead">A keyboard-first calculator with a cleaner interface, a real keypad, and menu shortcuts that work the moment you press them.</p>
+    </div>
+    <div class="status">
+      <div class="pill">Keyboard <strong>enabled</strong></div>
+      <div class="pill">Decimals: <strong id="decimalsBadge">2</strong></div>
+      <div class="pill">View: <strong id="viewBadge">Home</strong></div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="nav-card">
+        <h2>Navigation</h2>
+        <p>Press <strong>1</strong>, <strong>2</strong>, or <strong>3</strong> on the home screen to move instantly. In the calculator, type numbers and operators directly.</p>
+      </div>
+      <div class="nav-actions" id="navActions"></div>
+      <div class="nav-card">
+        <h2>Keyboard map</h2>
+        <p><strong>Home:</strong> 1 calculator, 2 settings, 3 exit.</p>
+        <p><strong>Calculator:</strong> digits, +, -, *, /, %, ., Enter, Backspace, Esc.</p>
+        <p><strong>Settings:</strong> digits, Backspace, Enter, Esc.</p>
+      </div>
+    </aside>
+
+    <main class="panel" id="panel" role="main" aria-live="polite"></main>
+  </div>
+
+  <footer class="footer">
+    <div class="note"><span class="dot"></span><span>Local demo file. Keyboard and mouse both drive the same state.</span></div>
+    <div>Press Esc to return home from calculator or settings.</div>
+  </footer>
+</div>
+
+<script>
+  const app = document.getElementById('app');
+  const panel = document.getElementById('panel');
+  const navActions = document.getElementById('navActions');
+  const decimalsBadge = document.getElementById('decimalsBadge');
+  const viewBadge = document.getElementById('viewBadge');
+
+  const state = {
+    view: 'home',
+    decimals: 2,
+    expression: '',
+    history: [],
+    draft: '2',
+    message: '',
+    messageType: 'info',
+    lastResult: null
+  };
+
+  const homeButtons = [
+    { key: '1', title: 'Calculator', hint: 'Open the full keypad calculator', view: 'calculator' },
+    { key: '2', title: 'Settings', hint: 'Change decimal precision', view: 'settings' },
+    { key: '3', title: 'Exit', hint: 'Show the exit panel', view: 'exit' }
+  ];
+
+  function escapeHtml(value){
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function updateStatus(){
+    decimalsBadge.textContent = String(state.decimals);
+    viewBadge.textContent = state.view.charAt(0).toUpperCase() + state.view.slice(1);
+  }
+
+  function setMessage(text, type = 'info'){
+    state.message = text;
+    state.messageType = type;
+    render();
+  }
+
+  function clearMessage(){
+    state.message = '';
+    render();
+  }
+
+  function activeHomeCard(view){
+    return state.view === view ? ' active' : '';
+  }
+
+  function renderNav(){
+    navActions.innerHTML = homeButtons.map(btn => `
+      <button class="menu-btn${activeHomeCard(btn.view)}" data-view="${btn.view}" type="button" aria-label="${btn.title}">
+        <span class="left">
+          <span class="label">${btn.title}</span>
+          <span class="hint">${btn.hint}</span>
+        </span>
+        <span class="key">${btn.key}</span>
+      </button>
+    `).join('');
+  }
+
+  function renderHome(){
+    const active = state.view === 'home';
+    return `
+      <section class="view home-view ${active ? 'active' : ''}">
+        <div style="width:100%;">
+          <div class="section-title">
+            <h2>Home</h2>
+            <div class="meta">Keyboard shortcuts are live</div>
+          </div>
+
+          <div class="hero">
+            <div class="card">
+              <h3>A cleaner calculator entry point</h3>
+              <p>The main menu still gives you Calculator, Settings, and Exit, but the app now responds to the keyboard like a real desktop tool. Press 1, 2, or 3 without clicking first.</p>
+              <div class="shortcut-row">
+                <span class="shortcut"><strong>1</strong> Calculator</span>
+                <span class="shortcut"><strong>2</strong> Settings</span>
+                <span class="shortcut"><strong>3</strong> Exit</span>
+                <span class="shortcut"><strong>Enter</strong> Calculator</span>
+              </div>
+            </div>
+            <div class="card">
+              <h3>What changed</h3>
+              <p>The calculator view now has a real keypad, direct typing, and formatting controls. The interface is quieter, more polished, and easier to scan on desktop or laptop screens.</p>
+            </div>
+          </div>
+
+          <div class="quick-grid">
+            ${homeButtons.map(btn => `
+              <button class="quick-card" type="button" data-view="${btn.view}">
+                <div class="top">
+                  <h4>${btn.title}</h4>
+                  <div class="num">${btn.key}</div>
+                </div>
+                <div class="copy">${btn.hint}</div>
+              </button>
+            `).join('')}
+          </div>
+
+          ${state.message ? `<div class="toast ${state.messageType}">${escapeHtml(state.message)}</div>` : ''}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderCalculatorHistory(){
+    if (state.history.length === 0){
+      return `<div class="history-item"><div class="expr-line">No calculations yet.</div><div class="res-line">Use the keypad or your keyboard to start.</div></div>`;
+    }
+    return state.history.slice().reverse().map(entry => `
+      <div class="history-item">
+        <div class="expr-line">${escapeHtml(entry.expr)}</div>
+        <div class="res-line">= ${escapeHtml(entry.result)}</div>
+      </div>
+    `).join('');
+  }
+
+  function livePreview(){
+    const expr = state.expression.trim();
+    if (!expr) return '0';
+    const value = tryEvaluate(expr);
+    if (value === null) return 'Ready';
+    return formatNumber(value);
+  }
+
+  function renderCalculator(){
+    return `
+      <section class="view calculator-view active">
+        <div class="calc-layout">
+          <div class="display">
+            <div class="screen">
+              <div class="screen-top">
+                <div><strong>Calculator</strong> mode</div>
+                <div>Type numbers directly or click the keys</div>
+              </div>
+              <div class="expr" aria-label="Expression">${escapeHtml(state.expression || '0')}</div>
+              <div class="result">
+                <div class="label">Result</div>
+                <div class="value">${escapeHtml(livePreview())}</div>
+              </div>
+            </div>
+
+            ${state.message ? `<div class="toast ${state.messageType}">${escapeHtml(state.message)}</div>` : ''}
+
+            <div class="keypad" aria-label="Calculator keypad">
+              <button type="button" class="key warning" data-action="clear">C</button>
+              <button type="button" class="key" data-action="backspace">DEL</button>
+              <button type="button" class="key operator" data-token="%">%</button>
+              <button type="button" class="key operator" data-token="/">/</button>
+
+              <button type="button" class="key" data-token="7">7</button>
+              <button type="button" class="key" data-token="8">8</button>
+              <button type="button" class="key" data-token="9">9</button>
+              <button type="button" class="key operator" data-token="*">*</button>
+
+              <button type="button" class="key" data-token="4">4</button>
+              <button type="button" class="key" data-token="5">5</button>
+              <button type="button" class="key" data-token="6">6</button>
+              <button type="button" class="key operator" data-token="-">-</button>
+
+              <button type="button" class="key" data-token="1">1</button>
+              <button type="button" class="key" data-token="2">2</button>
+              <button type="button" class="key" data-token="3">3</button>
+              <button type="button" class="key operator" data-token="+">+</button>
+
+              <button type="button" class="key wide" data-token="0">0</button>
+              <button type="button" class="key" data-token=".">.</button>
+              <button type="button" class="key emphasis" data-action="evaluate">=</button>
+            </div>
+          </div>
+
+          <aside class="supporting">
+            <div class="support-card">
+              <h3>Shortcuts</h3>
+              <p>Enter evaluates, Backspace deletes, Escape returns home, and C clears the current expression.</p>
+            </div>
+            <div class="support-card">
+              <h3>History</h3>
+              <div class="history-list">${renderCalculatorHistory()}</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderSettings(){
+    return `
+      <section class="view settings-view active">
+        <div style="max-width:860px;">
+          <div class="section-title">
+            <h2>Settings</h2>
+            <div class="meta">Decimal precision</div>
+          </div>
+
+          <div class="card">
+            <h3>Precision</h3>
+            <p>Use the number keys, Backspace, and Enter to set how many decimal places are shown in calculator results.</p>
+            <div class="setting-row">
+              <div class="label">Current decimal places</div>
+              <div class="value">${state.decimals}</div>
+            </div>
+            <div class="draft" aria-label="Decimal draft">${escapeHtml(state.draft || '') || 'Type a value from 0 to 9'}</div>
+            <div class="shortcut-row">
+              <span class="shortcut"><strong>Enter</strong> Apply</span>
+              <span class="shortcut"><strong>Esc</strong> Home</span>
+              <span class="shortcut"><strong>Backspace</strong> Delete</span>
+            </div>
+            ${state.message ? `<div class="toast ${state.messageType}">${escapeHtml(state.message)}</div>` : ''}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderExit(){
+    return `
+      <section class="view exit-view active">
+        <div style="max-width:860px;">
+          <div class="section-title">
+            <h2>Exit</h2>
+            <div class="meta">Demo end</div>
+          </div>
+
+          <div class="card">
+            <h3>Exit panel</h3>
+            <p>This is a browser-based demo, so closing the tab is not done from inside the page. Use Restart to return to the home screen and continue testing.</p>
+            <div class="shortcut-row">
+              <span class="shortcut"><strong>Enter</strong> Restart</span>
+              <span class="shortcut"><strong>Esc</strong> Home</span>
+            </div>
+            ${state.message ? `<div class="toast ${state.messageType}">${escapeHtml(state.message)}</div>` : ''}
+          </div>
+
+          <div style="margin-top:18px;" class="quick-grid">
+            <button class="quick-card" type="button" data-view="home">
+              <div class="top">
+                <h4>Restart demo</h4>
+                <div class="num">R</div>
+              </div>
+              <div class="copy">Go back to the main menu and keep testing the keyboard flow.</div>
+            </button>
+            <button class="quick-card" type="button" data-view="calculator">
+              <div class="top">
+                <h4>Calculator</h4>
+                <div class="num">1</div>
+              </div>
+              <div class="copy">Jump directly to the keypad calculator.</div>
+            </button>
+            <button class="quick-card" type="button" data-view="settings">
+              <div class="top">
+                <h4>Settings</h4>
+                <div class="num">2</div>
+              </div>
+              <div class="copy">Adjust decimal formatting before you calculate.</div>
+            </button>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function render(){
+    updateStatus();
+    renderNav();
+
+    if (state.view === 'home'){
+      panel.innerHTML = renderHome();
+    } else if (state.view === 'calculator'){
+      panel.innerHTML = renderCalculator();
+    } else if (state.view === 'settings'){
+      panel.innerHTML = renderSettings();
+    } else if (state.view === 'exit'){
+      panel.innerHTML = renderExit();
+    }
+
+    app.focus({ preventScroll: true });
+  }
+
+  function setView(view){
+    state.view = view;
+    if (view === 'settings'){
+      state.draft = String(state.decimals);
+    }
+    if (view !== 'home' && !state.message){
+      state.message = '';
+    }
+    render();
+  }
+
+  function formatNumber(value){
+    if (!Number.isFinite(value)) return 'Error';
+    const rounded = Number(value.toFixed(state.decimals));
+    if (Number.isInteger(rounded)) return rounded.toFixed(state.decimals);
+    return rounded.toFixed(state.decimals);
+  }
+
+  function isOperator(ch){
+    return ['+', '-', '*', '/', '%'].includes(ch);
+  }
+
+  function currentSegment(expr){
+    const match = expr.match(/(?:^|[+\-*/%()])([0-9.]+)$/);
+    return match ? match[1] : expr;
+  }
+
+  function normalizeExpression(expr){
+    return expr
+      .replaceAll('×', '*')
+      .replaceAll('÷', '/')
+      .replaceAll('−', '-')
+      .replace(/\s+/g, '');
+  }
+
+  function tryEvaluate(expr){
+    const normalized = normalizeExpression(expr);
+    if (!normalized) return null;
+    if (!/^[0-9+\-*/%().]+$/.test(normalized)) return null;
+    if (/^[+\/*%]/.test(normalized)) return null;
+    if (/[+\-*/%.]$/.test(normalized)) return null;
+    try{
+      const result = Function('"use strict"; return (' + normalized + ');')();
+      if (!Number.isFinite(result)) return null;
+      return result;
+    }catch{
+      return null;
+    }
+  }
+
+  function appendToken(token){
+    clearMessage();
+
+    if (state.view === 'settings'){
+      if (/^\d$/.test(token)){
+        state.draft = (state.draft === '0') ? token : (state.draft || '') + token;
+        render();
+      }
+      return;
+    }
+
+    if (state.view !== 'calculator'){
+      return;
+    }
+
+    let expr = state.expression || '';
+    if (!expr && /^[+*/%]$/.test(token)){
+      expr = '0';
+    }
+
+    if (!expr && token === '.'){
+      expr = '0';
+    }
+
+    const last = expr.slice(-1);
+    if (isOperator(token) && isOperator(last)){
+      expr = expr.slice(0, -1) + token;
+    } else if (token === '.' && currentSegment(expr).includes('.')){
+      return;
+    } else {
+      expr += token;
+    }
+
+    state.expression = expr;
+    render();
+  }
+
+  function evaluateExpression(){
+    if (state.view !== 'calculator') return;
+    const result = tryEvaluate(state.expression);
+    if (result === null){
+      setMessage('Enter a valid expression before pressing equals.', 'error');
+      return;
+    }
+
+    const output = formatNumber(result);
+    state.history.push({ expr: state.expression, result: output });
+    state.lastResult = result;
+    state.expression = output;
+    setMessage(`Success: ${output}`, 'success');
+  }
+
+  function clearExpression(){
+    if (state.view === 'calculator'){
+      state.expression = '';
+      clearMessage();
+      render();
+    } else if (state.view === 'settings'){
+      state.draft = '';
+      clearMessage();
+      render();
+    }
+  }
+
+  function backspace(){
+    if (state.view === 'calculator'){
+      state.expression = state.expression.slice(0, -1);
+      clearMessage();
+      render();
+    } else if (state.view === 'settings'){
+      state.draft = state.draft.slice(0, -1);
+      clearMessage();
+      render();
+    }
+  }
+
+  function applySettingsDraft(){
+    const value = Number.parseInt(state.draft, 10);
+    if (!Number.isInteger(value)){
+      setMessage('Enter a whole number between 0 and 9.', 'error');
+      return;
+    }
+    if (value < 0 || value > 9){
+      setMessage('Decimal places must be between 0 and 9.', 'error');
+      return;
+    }
+    state.decimals = value;
+    setMessage(`Settings updated. Decimal places set to ${value}.`, 'success');
+    setView('home');
+  }
+
+  function handleHomeShortcut(key, contextView){
+    if (key === '1' || (key === 'Enter' && contextView !== 'exit')){
+      setView('calculator');
+    } else if (key === '2'){
+      setView('settings');
+    } else if (key === '3'){
+      setView('exit');
+    } else if (key === 'Enter' && contextView === 'exit'){
+      setView('home');
+    } else if (key === 'Escape' && contextView === 'home'){
+      setView('exit');
+    } else if (key === 'Escape'){
+      setView('home');
+    }
+  }
+
+  function handleKeyDown(event){
+    if (event.metaKey || event.ctrlKey || event.altKey){
+      return;
+    }
+
+    const key = event.key;
+
+    if (state.view === 'home' || state.view === 'exit'){
+      if (['1', '2', '3', 'Enter', 'Escape'].includes(key)){
+        event.preventDefault();
+      handleHomeShortcut(key, state.view);
+      }
+      return;
+    }
+
+    if (state.view === 'calculator'){
+      if (/^\d$/.test(key) || ['+', '-', '*', '/', '%', '.', '(', ')'].includes(key)){
+        event.preventDefault();
+        appendToken(key);
+        return;
+      }
+      if (key === 'Enter' || key === '='){
+        event.preventDefault();
+        evaluateExpression();
+        return;
+      }
+      if (key === 'Backspace'){
+        event.preventDefault();
+        backspace();
+        return;
+      }
+      if (key === 'Delete' || key.toLowerCase() === 'c'){
+        event.preventDefault();
+        clearExpression();
+        return;
+      }
+      if (key === 'Escape'){
+        event.preventDefault();
+        setView('home');
+        return;
+      }
+      return;
+    }
+
+    if (state.view === 'settings'){
+      if (/^\d$/.test(key)){
+        event.preventDefault();
+        state.draft = (state.draft === '0') ? key : (state.draft || '') + key;
+        render();
+        return;
+      }
+      if (key === 'Backspace'){
+        event.preventDefault();
+        backspace();
+        return;
+      }
+      if (key === 'Enter'){
+        event.preventDefault();
+        applySettingsDraft();
+        return;
+      }
+      if (key === 'Escape'){
+        event.preventDefault();
+        setView('home');
+        return;
+      }
+    }
+  }
+
+  panel.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-view], [data-action], [data-token]');
+    if (!target) return;
+
+    const view = target.dataset.view;
+    const action = target.dataset.action;
+    const token = target.dataset.token;
+
+    if (view){
+      if (view === 'home'){
+        state.message = '';
+        state.expression = '';
+        state.draft = String(state.decimals);
+      }
+      setView(view);
+      return;
+    }
+
+    if (action === 'clear'){
+      clearExpression();
+      return;
+    }
+    if (action === 'backspace'){
+      backspace();
+      return;
+    }
+    if (action === 'evaluate'){
+      evaluateExpression();
+      return;
+    }
+
+    if (token){
+      appendToken(token);
+    }
+  });
+
+  navActions.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-view]');
+    if (!target) return;
+    const view = target.dataset.view;
+    if (view === 'home'){
+      state.expression = '';
+      state.draft = String(state.decimals);
+      state.message = '';
+    }
+    setView(view);
+  });
+
+  document.addEventListener('keydown', handleKeyDown);
+
+  setView('home');
+</script>
+</body>
+</html>
